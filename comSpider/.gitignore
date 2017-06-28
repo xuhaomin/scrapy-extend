@@ -1,0 +1,12 @@
+
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+
+
+
+# test
+/test-HTML/
+
