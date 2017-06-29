@@ -167,6 +167,13 @@ class CommonSpider(CrawlSpider):
                 item=item,
                 method=method,
             )
+        '''
+        MARK：
+            这里可以加判断，利用method关键字，增加对meta/函数方法的支持
+
+            又要写函数，好麻烦，有需要再加吧~
+            (～￣▽￣)～ 
+        '''
         return item
 
     ''' # use parse_with_rules example:
