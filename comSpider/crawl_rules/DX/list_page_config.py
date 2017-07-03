@@ -17,6 +17,7 @@ domains = []
 
 
 # 提取器 link_extractor 其中 key 为 'xpath','css','re'中的一种或多种，value为相对应的解析路径
+# todo 支持混用
 
 item_extractor = {
 

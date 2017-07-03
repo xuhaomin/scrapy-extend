@@ -89,6 +89,7 @@
 
 想了想，还是返回单个item，最后交给item-pipeline进行处理比较合适
 除了item-pipeline，items中还可以定义processor-out方法，来处理取回来的值
+返回多个item后续都不知道怎么处理了
 
 先这样吧，有需求以后再说
 

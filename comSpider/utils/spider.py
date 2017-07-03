@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import re
+import json
 try:
     from urlparse import urlparse
 except:
@@ -22,11 +23,14 @@ parse_with_rules 返回值为单个item
 其中 item key 继承自配置文件中crawl_item的自定义item
           value 来自于item_extractor遍历dom树后的结果，数据结构为list，每一个叶子节点extract的值作为元素
 '''
-
+'''
+改动日志：
+20170630 添加对json支持
+'''
 
 class CommonSpider(CrawlSpider):
 
-    auto_join_text = False
+    keywords = set(['__use'])
     ''' # item_extractor example:
     item_extractor = {
         'css': {
@@ -84,8 +88,21 @@ class CommonSpider(CrawlSpider):
             return sel.css(query)
         elif method == 're':
             return sel.re(query)
+        elif method == 'json':
+            return self.extract_from_json(sel, query)
         else:
             raise ValueError('Please use correct method --> xpath,css,re')
+
+    def extract_from_json(self, json_data, query):
+        data = json_data
+        for key in eval(query):
+            if key == '':
+                return data
+            try:
+                data = data[key]
+            except:
+                return []
+        return data
 
     def extract_item(self, sels):
         '''
@@ -118,8 +135,11 @@ class CommonSpider(CrawlSpider):
 
             nsel = self.item_selector(sel, nv, method)
             if nsel:
-                # Without any extra spaces:
-                item[nk].append(self.extract_item(nsel))
+                if method in ('css', 'xpath'):
+                    # Without any extra spaces:
+                    item[nk].append(self.extract_item(nsel))
+                elif method in ('re', 'json'):
+                    item[nk].append(nsel)
             else:
                 item[nk].append([])
 
@@ -145,8 +165,6 @@ class CommonSpider(CrawlSpider):
         if self.DEBUG:
             print(sth)
 
-    keywords = set(['__use'])
-
     def dfs(self, sel, rules, item, method):
         '''
         遍历
@@ -161,15 +179,26 @@ class CommonSpider(CrawlSpider):
     def parse_with_rules(self, response, rules, item_class):
         item = item_class()
         for method, rule in rules.items():
-            self.dfs(
-                Selector(response),
-                rules=rule,
-                item=item,
-                method=method,
-            )
+            if method in ('css', 're', 'xpath'):
+                self.dfs(
+                    Selector(response),
+                    rules=rule,
+                    item=item,
+                    method=method,
+                )
+            elif method == 'json':
+                self.dfs(
+                    json.loads(response.text),
+                    rules=rule,
+                    item=item,
+                    method=method,
+                )
+            else:
+                raise ValueError(
+                    'Please use correct method --> xpath,css,re,json')
         '''
         MARK：
-            这里可以加判断，利用method关键字，增加对meta/函数方法的支持
+            这里可以利用method关键字，增加对meta/函数方法的支持
 
             又要写函数，好麻烦，有需要再加吧~
             (～￣▽￣)～ 

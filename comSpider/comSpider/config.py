@@ -1,1 +1,1 @@
-from crawl_rules.DX.list_page_config import *
+from crawl_rules.IP.page_config import *
